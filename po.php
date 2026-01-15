@@ -25,17 +25,17 @@ abstract class FileSystem
 // Dossier
 class Dossier extends FileSystem
 {
-    /** @var FileSystem[] */
-    private array $enfants = [];
+    private array $child = [];
 
-    public function ajouter(FileSystem $enfant): void
+    public function __construct(string $name, int $size)
     {
-        $this->enfants[$enfant->getName()] = $enfant;
+        parent::__construct($name, $size);
+        $this->type = $type;
     }
 
-    public function getEnfant(string $nom): ?FileSystem
+    public function add (FileSystem $element): void
     {
-        return $this->enfants[$nom] ?? null;
+        $this->child[] = $element;
     }
 }
 
