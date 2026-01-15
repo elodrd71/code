@@ -1,50 +1,46 @@
 <?php
 
 // class abstraite
-abstract class NoeudSystemeFichier
+abstract class FileSystem
 {
-    protected string $nom;
-    protected ?int $taille;
-    protected ?DateTime $dateModification;
-    protected ?string $auteur;
+    protected $name;
+    protected $size;
 
-    public function __construct(
-        string $nom,
-        ?int $taille = null,
-        ?DateTime $dateModification = null,
-        ?string $auteur = null
-    ) {
-        $this->nom = $nom;
-        $this->taille = $taille;
-        $this->dateModification = $dateModification;
-        $this->auteur = $auteur;
+    public function __construct(string $name,int $size = null) {
+        $this->name = $name;
+        $this->size = $size;
     }
 
-    public function getNom(): string
+    public function getName(): string
     {
-        return $this->nom;
+        return $this->name;
+    }
+
+    public function getSize(): int
+    {
+        return $this->size;
     }
 }
 
 // Dossier
-class Dossier extends NoeudSystemeFichier
+class Dossier extends FileSystem
 {
-    /** @var NoeudSystemeFichier[] */
+    /** @var FileSystem[] */
     private array $enfants = [];
 
-    public function ajouter(NoeudSystemeFichier $enfant): void
+    public function ajouter(FileSystem $enfant): void
     {
-        $this->enfants[$enfant->getNom()] = $enfant;
+        $this->enfants[$enfant->getName()] = $enfant;
     }
 
-    public function getEnfant(string $nom): ?NoeudSystemeFichier
+    public function getEnfant(string $nom): ?FileSystem
     {
         return $this->enfants[$nom] ?? null;
     }
 }
 
 // Fichier
-class Fichier extends NoeudSystemeFichier
+class Fichier extends FileSystem
 {
     public function afficher(string $prefix = '', bool $estDernier = true): void
     {
