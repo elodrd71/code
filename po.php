@@ -1,8 +1,6 @@
 <?php
 
-// ==============================
-// 1. Classe abstraite commune
-// ==============================
+// class abstraite
 abstract class NoeudSystemeFichier
 {
     protected string $nom;
@@ -26,19 +24,9 @@ abstract class NoeudSystemeFichier
     {
         return $this->nom;
     }
-
-    public function ajouter(NoeudSystemeFichier $enfant): void
-    {
-        // Par défaut, un noeud ne peut pas avoir d'enfants.
-        throw new \LogicException('Impossible d\'ajouter un enfant à ce type de noeud');
-    }
-
-    abstract public function afficher(string $prefix = '', bool $estDernier = true): void;
 }
 
-// ==============================
-// 2. Dossier (Composite)
-// ==============================
+// Dossier
 class Dossier extends NoeudSystemeFichier
 {
     /** @var NoeudSystemeFichier[] */
@@ -53,31 +41,9 @@ class Dossier extends NoeudSystemeFichier
     {
         return $this->enfants[$nom] ?? null;
     }
-
-    public function afficher(string $prefix = '', bool $estDernier = true): void
-    {
-        // Affiche le nom du dossier avec les branches.
-        echo $prefix;
-        echo $estDernier ? '└─ ' : '├─ ';
-        echo $this->nom . PHP_EOL;
-
-        // Nouveau préfixe pour les enfants.
-        $nouveauPrefix = $prefix . ($estDernier ? '   ' : '│  ');
-
-        $total = count($this->enfants);
-        $i = 0;
-
-        foreach ($this->enfants as $enfant) {
-            $i++;
-            $enfantEstDernier = ($i === $total);
-            $enfant->afficher($nouveauPrefix, $enfantEstDernier);
-        }
-    }
 }
 
-// ==============================
-// 3. Fichier (Feuille)
-// ==============================
+// Fichier
 class Fichier extends NoeudSystemeFichier
 {
     public function afficher(string $prefix = '', bool $estDernier = true): void
@@ -88,55 +54,6 @@ class Fichier extends NoeudSystemeFichier
     }
 }
 
-// ==============================
-// 4. Constructeur de l'arbre
-// ==============================
-class ConstructeurSystemeFichier
-{
-    public function construire(array $chemins): Dossier
-    {
-        // Racine logique de l'arbre.
-        $racine = new Dossier('/');
-
-        foreach ($chemins as $chemin) {
-            $this->ajouterChemin($racine, $chemin);
-        }
-
-        return $racine;
-    }
-
-    private function ajouterChemin(Dossier $racine, string $chemin): void
-    {
-        // "/home/josh/app/index.js" -> ['home','josh','app','index.js']
-        $segments = array_values(array_filter(explode('/', $chemin)));
-
-        $courant = $racine;
-        $dernierIndex = count($segments) - 1;
-
-        foreach ($segments as $index => $segment) {
-            $estDernier = ($index === $dernierIndex);
-
-            if ($estDernier) {
-                // On considère le dernier segment comme un fichier.
-                $fichier = new Fichier($segment);
-                $courant->ajouter($fichier);
-            } else {
-                $enfant = $courant->getEnfant($segment);
-
-                if (!$enfant instanceof Dossier) {
-                    $enfant = new Dossier($segment);
-                    $courant->ajouter($enfant);
-                }
-
-                $courant = $enfant;
-            }
-        }
-    }
-}
-
-// ==============================
-// 5. Exemple d'utilisation
-// ==============================
 
 $chemins = [
     "/home/josh/project/app/src/index.js",
@@ -153,15 +70,4 @@ $chemins = [
     "/etc/hosts",
 ];
 
-$constructeur = new ConstructeurSystemeFichier();
-$racine = $constructeur->construire($chemins);
 
-// Affichage de l'arbre (on ne montre pas la racine "/" pour se rapprocher de ton exemple).
-// Si tu veux afficher /, remplace la ligne suivante par : $racine->afficher();
-foreach (['etc', 'home', 'opt', 'usr', 'var'] as $nomRacine) {
-    $noeud = $racine->getEnfant($nomRacine);
-    if ($noeud !== null) {
-        // On suppose que chaque élément de premier niveau est indépendant.
-        $noeud->afficher('', false);
-    }
-}
